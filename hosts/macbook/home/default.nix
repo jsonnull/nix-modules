@@ -13,6 +13,7 @@ in
   imports = [
     # Home modules (explicit)
     ../../../modules/home/theme
+    ../../../modules/home/tools/ghostty
     ../../../modules/home/tools/nixcats
     ../../../modules/home/tools/obsidian
     ../../../modules/home/tools/vscode
@@ -46,11 +47,25 @@ in
   #apps.slack.enable = true;
 
   # Enable tool modules
-  #tools.alacritty.enable = true;
+  tools.ghostty.enable = true;
   tools.nixcats.enable = true;
   tools.obsidian.enable = true;
   tools.vscode.enable = true;
   #xdg.configFile.alacritty.source = lib.mkForce (../../config/alacritty-macbook);
+
+  home.packages = with pkgs; [
+    dockutil
+    tailscale
+  ];
+
+  home.activation.dock = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ${pkgs.dockutil}/bin/dockutil --remove all --no-restart
+    ${pkgs.dockutil}/bin/dockutil --add "/Applications/Firefox.app" --no-restart
+    ${pkgs.dockutil}/bin/dockutil --add "$HOME/.nix-profile/Applications/Alacritty.app" --no-restart
+    ${pkgs.dockutil}/bin/dockutil --add "/Applications/Music.app" --no-restart
+    ${pkgs.dockutil}/bin/dockutil --add "/Applications/Slack.app" --no-restart
+    ${pkgs.dockutil}/bin/dockutil --add "$HOME/.nix-profile/Applications/Visual Studio Code.app" --no-restart
+  '';
 
   programs.zsh.initExtraFirst = ''
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
