@@ -67,7 +67,7 @@ in
           "terminal.integrated.customGlyphs" = true;
           "editor.fontSize" = 14;
           "editor.fontLigatures" = true;
-          "workbench.colorTheme" = "Monochrome GitHub Dark Default";
+          #"workbench.colorTheme" = "Monochrome GitHub Dark Default"; # Theme temporarily disabled
           "workbench.tree.renderIndentGuides" = "none";
           "vim.textwidth" = 100;
           "vim.useSystemClipboard" = true;
