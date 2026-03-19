@@ -13,6 +13,7 @@ in
   imports = [
     # Home modules (explicit)
     ../../../modules/home/theme
+    ../../../modules/home/tools/development
     ../../../modules/home/tools/ghostty
     ../../../modules/home/tools/nixcats
     ../../../modules/home/tools/obsidian
@@ -46,6 +47,7 @@ in
   #apps.slack.enable = true;
 
   # Enable tool modules
+  tools.dev-general.enable = true;
   tools.ghostty.enable = true;
   tools.nixcats.enable = true;
   tools.obsidian.enable = true;
