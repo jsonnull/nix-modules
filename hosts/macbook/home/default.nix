@@ -16,7 +16,6 @@ in
     ../../../modules/home/tools/ghostty
     ../../../modules/home/tools/nixcats
     ../../../modules/home/tools/obsidian
-    ../../../modules/home/tools/vscode
     ../../../modules/home/term
     ../../../modules/home/private
   ];
@@ -50,7 +49,6 @@ in
   tools.ghostty.enable = true;
   tools.nixcats.enable = true;
   tools.obsidian.enable = true;
-  tools.vscode.enable = true;
   #xdg.configFile.alacritty.source = lib.mkForce (../../config/alacritty-macbook);
 
   home.packages = with pkgs; [
