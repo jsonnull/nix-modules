@@ -56,6 +56,7 @@ in
   home.packages = with pkgs; [
     dockutil
     tailscale
+    (nerd-fonts.iosevka)
   ];
 
   home.activation.dock = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
