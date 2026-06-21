@@ -13,7 +13,6 @@
     pkgs.vscode-json-languageserver
     pkgs.yaml-language-server
     pkgs.gh
-    pkgs.graphite-cli
     pkgs.rust-analyzer
     pkgs.nil
     pkgs.nixfmt

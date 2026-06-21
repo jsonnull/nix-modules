@@ -97,7 +97,6 @@
         "cuda_sanitizer_api"
         "cudnn"
         "discord"
-        "graphite-cli"
         "libcublas"
         "libcufft"
         "libcurand"
