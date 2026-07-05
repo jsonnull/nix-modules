@@ -67,7 +67,7 @@ in
           "terminal.integrated.customGlyphs" = true;
           "editor.fontSize" = 14;
           "editor.fontLigatures" = true;
-          #"workbench.colorTheme" = "Monochrome GitHub Dark Default"; # Theme temporarily disabled
+          # "workbench.colorTheme" = "Monochrome GitHub Dark Default"; # Theme temporarily disabled
           "workbench.tree.renderIndentGuides" = "none";
           "vim.textwidth" = 100;
           "vim.useSystemClipboard" = true;
@@ -126,7 +126,9 @@ in
           "search.exclude" = {
             "**/.direnv" = true;
           };
-          "claudeCode.claudeProcessWrapper" = "${inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code}/bin/claude"; # TODO: reference from claude module
+          "claudeCode.claudeProcessWrapper" = "${
+            inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+          }/bin/claude"; # TODO: reference from claude module
           "claudeCode.preferredLocation" = "panel";
         };
         keybindings = [
