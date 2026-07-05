@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   config,
   ...
 }:
@@ -15,7 +16,7 @@ in
       shellIntegration.enableZshIntegration = true;
 
       settings = {
-        shell = "/etc/profiles/per-user/json/bin/zsh";
+        shell = "${pkgs.zsh}/bin/zsh";
 
         # Font
         font_family = "IosevkaTerm Nerd Font";

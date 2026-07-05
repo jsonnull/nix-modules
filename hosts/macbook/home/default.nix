@@ -14,9 +14,11 @@ in
     # Home modules (explicit)
     ../../../modules/home/theme
     ../../../modules/home/tools/development
-    ../../../modules/home/tools/ghostty
+    ../../../modules/home/tools/kitty
     ../../../modules/home/tools/nixcats
     ../../../modules/home/tools/obsidian
+    ../../../modules/home/tools/zellij
+    ../../../modules/home/tools/codex
     ../../../modules/home/term
     ../../../modules/home/private
   ];
@@ -48,9 +50,13 @@ in
 
   # Enable tool modules
   tools.dev-general.enable = true;
-  tools.ghostty.enable = true;
+  tools.kitty.enable = true;
+  programs.kitty.settings.hide_window_decorations = lib.mkForce "no";
+  programs.kitty.settings.macos_option_as_alt = "both";
   tools.nixcats.enable = true;
   tools.obsidian.enable = true;
+  tools.zellij.enable = true;
+  tools.codex.enable = true;
   #xdg.configFile.alacritty.source = lib.mkForce (../../config/alacritty-macbook);
 
   home.packages = with pkgs; [
