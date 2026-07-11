@@ -1,12 +1,12 @@
 {
   pkgs,
-  inputs,
+  flakeInputs,
   ...
 }:
 let
   system = pkgs.stdenv.hostPlatform.system;
-  llm-agents = inputs.llm-agents.packages.${system};
-  comfy-ui-cuda = inputs.comfyui-nix.packages.${system}.cuda;
+  llm-agents = flakeInputs.llm-agents.packages.${system};
+  comfy-ui-cuda = flakeInputs.comfyui-nix.packages.${system}.cuda;
 in
 {
   networking.firewall.allowedTCPPorts = [

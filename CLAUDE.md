@@ -1,18 +1,20 @@
-# Configuration Repository
+# nix-modules
 
-NixOS configuration using Nix flakes.
+Public NixOS and Home Manager modules published as a flake. This repo contains
+no hosts and no composition root — the private configuration repo at
+`~/configuration` consumes these modules as its `nix-modules` flake input.
 
 ## Structure
 
-- `hosts/` - Systems managed
-  - `macbook/` - macOS home
-  - `renderer/` - main NixOS system and home
-- `modules/`
-  - `nixos/` - NixOS modules
-  - `home/` - Home Manager modules
+- `modules/nixos/` - NixOS modules
+- `modules/home/` - Home Manager modules
 - `packages/` - Custom packages
-- `shells/` - Development shells
 
-## Private Configuration
+## Conventions
 
-Additional configuration is kept in `../private-config/` for private settings.
+- Modules read this flake's inputs via the `flakeInputs` module argument
+  (bound in `flake.nix`), never via `inputs` — `inputs` belongs to consumers.
+- Never use module args (like `flakeInputs`) inside `imports`; hoist external
+  module imports into the flake-level wrapper in `flake.nix`.
+- Nothing private goes here: no hostnames, network topology, hardware IDs, or
+  secrets. Those live in the private configuration repo.

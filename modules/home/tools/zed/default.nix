@@ -1,17 +1,17 @@
 {
   lib,
   pkgs,
-  inputs,
+  flakeInputs,
   config,
   ...
 }:
 let
   cfg = config.tools.zed;
-  pkgs-zed = import inputs.nixpkgs-zed {
+  pkgs-zed = import flakeInputs.nixpkgs-zed {
     system = pkgs.stdenv.hostPlatform.system;
     config = pkgs.config;
   };
-  jessZed = inputs.jess-lang.packages.${pkgs.stdenv.hostPlatform.system}.zed;
+  jessZed = flakeInputs.jess-lang.packages.${pkgs.stdenv.hostPlatform.system}.zed;
   json = pkgs.formats.json { };
 in
 {

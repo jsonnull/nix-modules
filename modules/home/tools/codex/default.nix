@@ -2,13 +2,13 @@
   config,
   lib,
   pkgs,
-  inputs,
+  flakeInputs,
   ...
 }:
 
 let
   cfg = config.tools.codex;
-  llm-agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  llm-agents = flakeInputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
   options.tools.codex = {

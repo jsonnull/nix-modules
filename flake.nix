@@ -1,5 +1,5 @@
 {
-  description = "We got here through trial and error";
+  description = "Public NixOS and Home Manager modules";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -7,33 +7,10 @@
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
 
     # Temporary package set for pulling a newer Zed without moving the
-    # system-wide nixpkgs input or the WiVRn nixpkgs-master input.
+    # module-wide nixpkgs input or the WiVRn nixpkgs-master input.
     nixpkgs-zed.url = "github:NixOS/nixpkgs/master";
 
     nixCats.url = "github:BirdeeHub/nixCats-nvim";
-
-    home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    sops-nix = {
-      url = "github:Mic92/sops-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # Config module is on `very-refactor` (has `includes`, needed for niri 26.04 blur).
-    # Packages stay on `main` so we can use niri-flake's binary cache.
-    # See https://github.com/sodiboo/niri-flake/issues/1721
-    niri = {
-      url = "github:sodiboo/niri-flake/very-refactor";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    niri-pkgs = {
-      url = "github:sodiboo/niri-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     stable-diffusion-webui-nix = {
       url = "github:Janrupf/stable-diffusion-webui-nix/main";
@@ -62,143 +39,153 @@
       url = "git+ssh://git@github.com/jsonnull/jess-lang.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # Points to public stub by default; override with real private repo locally:
-    # --override-input private git+https://github.com/jsonnull/private-config
-    # --override-input private path:/home/json/private-config
-    private = {
-      url = "github:jsonnull/private-config-stub";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
     { self, nixpkgs, ... }@inputs:
     let
-      allowedUnfree = [
-        "1password"
-        "1password-cli"
-        "blender"
-        "claude-code"
-        "cuda-merged"
-        "cuda_cccl"
-        "cuda_cudart"
-        "cuda_cuobjdump"
-        "cuda_cupti"
-        "cuda_cuxxfilt"
-        "cuda_gdb"
-        "cuda_nvcc"
-        "cuda_nvdisasm"
-        "cuda_nvml_dev"
-        "cuda_nvprune"
-        "cuda_nvrtc"
-        "cuda_nvtx"
-        "cuda_profiler_api"
-        "cuda_sanitizer_api"
-        "cudnn"
-        "discord"
-        "libcublas"
-        "libcufft"
-        "libcurand"
-        "libcusolver"
-        "libcusparse"
-        "libnpp"
-        "libnvjitlink"
-        "nvidia-settings"
-        "nvidia-x11"
-        "obsidian"
-        "slack"
-        "steam"
-        "steam-unwrapped"
-        "vscode"
-        "vscode-extension-github-copilot"
-        "vscode-extension-ms-vsliveshare-vsliveshare"
-      ];
-
-      overlays = [
-        inputs.niri-pkgs.overlays.niri
-        inputs.stable-diffusion-webui-nix.overlays.default
-      ];
-
-      nixpkgsConfig = {
-        allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) allowedUnfree;
+      # Binds this flake's own inputs to the `flakeInputs` module argument so
+      # consumers never have to redeclare them. Uses `key` so the module system
+      # deduplicates it when several exported modules are imported together.
+      argsModule = {
+        _file = "nix-modules/flake.nix";
+        key = "nix-modules#flakeInputs";
+        config._module.args.flakeInputs = inputs;
       };
+
+      # The wrapper key must differ from the wrapped path's own module key,
+      # or the module system deduplicates the real module away.
+      wrap = path: {
+        _file = toString path;
+        key = "${toString path}#nix-modules-wrapper";
+        imports = [
+          argsModule
+          path
+        ];
+      };
+
+      mapModules = builtins.mapAttrs (_: wrap);
+
+      forAllSystems = nixpkgs.lib.genAttrs [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
     in
     {
-      nixosConfigurations.renderer = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
-        modules = [
-          # External modules
-          inputs.sops-nix.nixosModules.sops
-          inputs.home-manager.nixosModules.home-manager
-          inputs.niri.nixosModules.niri
-
-          # Custom NixOS modules (explicit)
-          ./modules/nixos/theme
-          ./modules/nixos/printing
-          ./modules/nixos/ai
-          ./modules/nixos/vr
-          ./modules/nixos/private
-
-          # Host configuration
-          ./hosts/renderer/nixos
-
-          # Home-manager integration
-          {
-            home-manager = {
-              useGlobalPkgs = true;
-              useUserPackages = true;
-              extraSpecialArgs = { inherit inputs; };
-              users.json = import ./hosts/renderer/home;
-            };
-          }
-
-          # Nixpkgs config
-          {
-            nixpkgs = {
-              inherit overlays;
-              config = nixpkgsConfig;
-            };
-          }
-        ];
+      nixosModules = mapModules {
+        theme = ./modules/nixos/theme;
+        printing = ./modules/nixos/printing;
+        ai = ./modules/nixos/ai;
+        vr = ./modules/nixos/vr;
       };
 
-      homeConfigurations."jsonnull@macbook" = inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs {
-          system = "aarch64-darwin";
-          inherit overlays;
-          config = nixpkgsConfig;
+      homeManagerModules =
+        mapModules {
+          theme = ./modules/home/theme;
+          term = ./modules/home/term;
+
+          chrome = ./modules/home/apps/chrome;
+          discord = ./modules/home/apps/discord;
+          keepassxc = ./modules/home/apps/keepassxc;
+          slack = ./modules/home/apps/slack;
+
+          claude = ./modules/home/tools/claude;
+          codex = ./modules/home/tools/codex;
+          development = ./modules/home/tools/development;
+          gamedev = ./modules/home/tools/gamedev;
+          kitty = ./modules/home/tools/kitty;
+          obsidian = ./modules/home/tools/obsidian;
+          vscode = ./modules/home/tools/vscode;
+          waybar = ./modules/home/tools/waybar;
+          zed = ./modules/home/tools/zed;
+          zellij = ./modules/home/tools/zellij;
+        }
+        // {
+          # nixCats' home module has to be imported at flake level: module
+          # arguments like `flakeInputs` can't be used inside `imports`.
+          nixcats = {
+            _file = "nix-modules/flake.nix#nixcats";
+            key = "${toString ./modules/home/tools/nixcats}#nix-modules-wrapper";
+            imports = [
+              inputs.nixCats.homeModule
+              argsModule
+              ./modules/home/tools/nixcats
+            ];
+          };
         };
-        extraSpecialArgs = { inherit inputs; };
-        modules = [
-          inputs.sops-nix.homeManagerModules.sops
-          ./hosts/macbook/home
+
+      overlays = {
+        stable-diffusion = inputs.stable-diffusion-webui-nix.overlays.default;
+      };
+
+      lib = {
+        # Unfree package names required by the modules in this flake, for use
+        # in the consumer's `allowUnfreePredicate`.
+        allowedUnfree = [
+          "1password"
+          "1password-cli"
+          "blender"
+          "claude-code"
+          "cuda-merged"
+          "cuda_cccl"
+          "cuda_cudart"
+          "cuda_cuobjdump"
+          "cuda_cupti"
+          "cuda_cuxxfilt"
+          "cuda_gdb"
+          "cuda_nvcc"
+          "cuda_nvdisasm"
+          "cuda_nvml_dev"
+          "cuda_nvprune"
+          "cuda_nvrtc"
+          "cuda_nvtx"
+          "cuda_profiler_api"
+          "cuda_sanitizer_api"
+          "cudnn"
+          "discord"
+          "libcublas"
+          "libcufft"
+          "libcurand"
+          "libcusolver"
+          "libcusparse"
+          "libnpp"
+          "libnvjitlink"
+          "nvidia-settings"
+          "nvidia-x11"
+          "obsidian"
+          "slack"
+          "steam"
+          "steam-unwrapped"
+          "vscode"
+          "vscode-extension-github-copilot"
+          "vscode-extension-ms-vsliveshare-vsliveshare"
         ];
       };
 
-      devShells =
+      packages = forAllSystems (
+        system:
         let
-          forAllSystems = nixpkgs.lib.genAttrs [
-            "x86_64-linux"
-            "aarch64-darwin"
-          ];
+          pkgs = import nixpkgs { inherit system; };
         in
-        forAllSystems (system: {
-          default =
-            let
-              pkgs = import nixpkgs {
-                inherit system overlays;
-                config = nixpkgsConfig;
-              };
-            in
-            pkgs.mkShell {
-              name = "configuration";
-              packages = with pkgs; [
-                nil
-                nixfmt
-              ];
-            };
-        });
+        {
+          claude-notifications-go = pkgs.callPackage ./packages/claude-notifications-go { };
+        }
+      );
+
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        {
+          default = pkgs.mkShell {
+            name = "nix-modules";
+            packages = with pkgs; [
+              nil
+              nixfmt
+            ];
+          };
+        }
+      );
     };
 }

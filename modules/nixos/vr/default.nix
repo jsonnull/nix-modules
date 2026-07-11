@@ -1,10 +1,10 @@
 {
   pkgs,
-  inputs,
+  flakeInputs,
   ...
 }:
 let
-  pkgs-master = import inputs.nixpkgs-master {
+  pkgs-master = import flakeInputs.nixpkgs-master {
     system = pkgs.stdenv.hostPlatform.system;
     config = pkgs.config;
   };

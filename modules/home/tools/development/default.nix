@@ -2,13 +2,13 @@
   lib,
   pkgs,
   config,
-  inputs,
+  flakeInputs,
   ...
 }:
 let
   cfg = config.tools.dev-general;
   caRoot = "${config.home.homeDirectory}/.local/share/mkcert";
-  llm-agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+  llm-agents = flakeInputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
   options.tools.dev-general.enable = lib.mkEnableOption "Enable general development tools";

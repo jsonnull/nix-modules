@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  inputs,
+  flakeInputs,
   ...
 }:
 
@@ -25,7 +25,7 @@ in
             github.vscode-pull-request-github
             github.vscode-github-actions
 
-            inputs.monochrome-vscode-theme.packages.${pkgs.stdenv.hostPlatform.system}.default
+            flakeInputs.monochrome-vscode-theme.packages.${pkgs.stdenv.hostPlatform.system}.default
 
             #astro-build.astro-vscode
             jnoortheen.nix-ide
@@ -127,7 +127,7 @@ in
             "**/.direnv" = true;
           };
           "claudeCode.claudeProcessWrapper" = "${
-            inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+            flakeInputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
           }/bin/claude"; # TODO: reference from claude module
           "claudeCode.preferredLocation" = "panel";
         };

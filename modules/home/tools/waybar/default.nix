@@ -1,13 +1,13 @@
 {
   lib,
   pkgs,
-  inputs,
+  flakeInputs,
   config,
   ...
 }:
 let
   cfg = config.tools.waybar;
-  ccusage = inputs.ccusage.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  ccusage = flakeInputs.ccusage.packages.${pkgs.stdenv.hostPlatform.system}.default;
   agentUsage = pkgs.writeShellScript "waybar-agent-usage" ''
     today="$(${pkgs.coreutils}/bin/date +%F)"
 
