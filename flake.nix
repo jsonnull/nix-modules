@@ -6,19 +6,11 @@
 
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
 
-    # Temporary package set for pulling a newer Zed without moving the
-    # module-wide nixpkgs input or the WiVRn nixpkgs-master input.
-    nixpkgs-zed.url = "github:NixOS/nixpkgs/master";
-
     nixCats.url = "github:BirdeeHub/nixCats-nvim";
 
     stable-diffusion-webui-nix = {
       url = "github:Janrupf/stable-diffusion-webui-nix/main";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    comfyui-nix = {
-      url = "github:utensils/comfyui-nix";
     };
 
     "monochrome-vscode-theme" = {
@@ -97,7 +89,6 @@
           obsidian = ./modules/home/tools/obsidian;
           vscode = ./modules/home/tools/vscode;
           waybar = ./modules/home/tools/waybar;
-          zed = ./modules/home/tools/zed;
           zellij = ./modules/home/tools/zellij;
         }
         // {

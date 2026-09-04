@@ -4,9 +4,16 @@
   ...
 }:
 let
+  # Only forward what WiVRn's closure needs. Passing the consumer's whole
+  # `pkgs.config` breaks whenever their nixpkgs gains an option this pinned
+  # tree does not know (e.g. `rewriteURL`). CUDA is explicit so the NVENC
+  # encoder path stays on regardless of the consumer's global `cudaSupport`.
   pkgs-master = import flakeInputs.nixpkgs-master {
     system = pkgs.stdenv.hostPlatform.system;
-    config = pkgs.config;
+    config = {
+      inherit (pkgs.config) allowUnfree allowUnfreePredicate;
+      cudaSupport = true;
+    };
   };
 in
 {
