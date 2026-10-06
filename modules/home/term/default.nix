@@ -95,7 +95,7 @@
     enableZshIntegration = true;
     shellWrapperName = "y";
     settings = {
-      manager = {
+      mgr = {
         ratio = [
           0
           2
